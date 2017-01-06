@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet"
+	href="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+<script
+	src="https://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+<script
+	src="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="test.js"></script>
+</head>
+<body>
+	<div class="container">
+		<div>
+			<div class="page-header">
+				<h1>
+					Movie Rentals <small>Please Login First</small>
+				</h1>
+			</div>
+		</div>
+		<div>
+			<div class="form-horizontal" role="form" style="margin-top:150px;">
+			  <div class="form-group" >
+					<label for="first_name" class="col-sm-3 control-label">first_name</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" id="first_name" placeholder="first_name" style="width:70%">
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-offset-2 col-sm-5 col-sm-pull-1 text-right">
+						<button id="login" class="btn btn-info">Login</button>
+					</div>
+				</div>
+			</div>
+		</div>
+</div>		
+<!-- system modal start -->
+    <div id="com-alert" class="modal" style="z-index:9999;display: none;" >
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+            <h5 class="modal-title"><i class="fa fa-exclamation-circle"></i> [Title]</h5>
+          </div>
+          <div class="modal-body small">
+            <p>[Message]</p>
+          </div>
+          <div class="modal-footer" >
+            <button type="button" class="btn btn-primary ok" data-dismiss="modal">[BtnOk]</button>
+            <button type="button" class="btn btn-default cancel" data-dismiss="modal">[BtnCancel]</button>
+          </div>
+        </div>
+      </div>
+    </div>
+<!-- system modal end -->
+  
+  
+	<script>
+	$('#login').click(function() {
+		login({
+			first_name: $('#first_name').val()
+        });
+    });
+	
+    function login(loginInfo) {         
+        $.ajax({
+            url: "user",
+            type: "GET",
+            dataType: "json",
+            data: loginInfo,
+            success: function (data) {
+               window.location.href="index.html";
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+            	Modal.alert(
+            			  {
+            			    title: 'Alert',
+            			    msg: 'Incorrect username! Please try again',
+            			    btnok: 'OK'
+            			  });
+
+            }
+        }) 
+    }
+	</script>
+	
+
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Title</title>
+<link rel="stylesheet"
+	href="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+<script
+	src="https://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+<script
+	src="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="test.js"></script>
+<script type="text/javascript">
+/*
+function sumbit_sure(){  
+	   var gnl=confirm("确定要删除?");  
+	   if (gnl==true){  
+	       return true;  
+	   }else{  
+	    return false;  
+	   }  	*/
+</script>
+</head>
+<body>
+
+	<div class="container">
+		<div>
+			<div class="page-header">
+				<h1>
+					Movie Rentals <small>Film Information</small>
+				</h1>
+			</div>
+		</div>
+		<div>
+			<div class="form-horizontal" role="form" style="margin-top: 50px" >
+				<div class="form-group col-sm-4">
+					<label for="film_id" class="col-sm-4 control-label">film_id</label>
+					<div class="col-sm-8">
+						<input type="number" class="form-control" id="film_id" placeholder="film_id" min="1">
+					</div>
+				</div>
+				<div class="form-group col-sm-4">
+					<label for="title" class="col-sm-4 control-label">title</label>
+					<div class="col-sm-8">
+						<input type="text" class="form-control" id="title"
+							placeholder="title">
+					</div>
+				</div>
+				<div class="form-group col-sm-4">
+					<label for="description" class="col-sm-4 control-label">description</label>
+					<div class="col-sm-8">
+						<input type="text" class="form-control" id="description"
+							placeholder="description">
+					</div>
+				</div>
+				<div class="form-group">
+	               <div class="col-sm-2 text-center">
+	               <button id="insert" class="btn btn-info">Insert</button>
+	               </div>
+	               <div class="col-sm-8 ">
+	               </div>
+	               <div class="col-sm-2">
+	               <button id="query" class="btn btn-info">查询</button>
+	               </div>
+				</div>
+			</div>
+		</div>
+		<div>
+			<table id="filmTable" class="table table-striped">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Title</th>
+						<th>description</th>
+						<th>Language</th>
+						<th>更新</th>
+						<th>删除</th>
+					</tr>
+				</thead>
+				<tbody>
+
+				</tbody>
+			</table>
+		</div>
+		<div>
+			<ul id="pagination" class="pagination col-sm-7" style="margin: 0">
+				<li><a href="#">&lt;&lt;</a></li>
+				<li><a href="#">&gt;&gt;</a></li>
+			</ul>
+
+			<div class="col-sm-1">
+				<select id="pageSize" class="form-control">
+					<option value="10">10</option>
+					<option value="20">20</option>
+					<option value="50">50</option>
+				</select>
+			</div>
+			<div class="col-sm-1">
+				<input id="currentPage" type="number" class="form-control" min="1">
+			</div>
+			<div class="col-sm-2">
+			    <label id="countPage" class="control-label">总共:</label>
+			</div>
+			<button id="go" class="btn btn-primary">跳转</button>
+			
+		</div>
+
+<!-- system modal start -->
+    <div id="com-alert" class="modal" style="z-index:9999;display: none;" >
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+            <h5 class="modal-title"><i class="fa fa-exclamation-circle"></i> [Title]</h5>
+          </div>
+          <div class="modal-body small">
+            <p>[Message]</p>
+          </div>
+          <div class="modal-footer" >
+            <button type="button" class="btn btn-primary ok" data-dismiss="modal">[BtnOk]</button>
+            <button type="button" class="btn btn-default cancel" data-dismiss="modal">[BtnCancel]</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  <!-- system modal end -->
+
+		<script id="rowTemplate" type="application/html">
+        <tr>
+            <td></td><td></td><td></td><td></td><td></td><td></td>
+        </tr>
+       </script>
+
+		<script>
+        $('document').ready(function () {
+            window.page = {
+            		currentPage: 1,
+                    pageSize: Number($('#pageSize').val()),
+                    total: 0,
+                    totalPage: 0
+                };
+            console.log(window.page);
+            query(page);
+        	$('#insert').click(function() {
+               window.location.href="insert.html";
+            });
+            $('#query').click(function() {
+                query({
+                	film_id:$('#film_id').val(),
+                	title: $('#title').val(),
+                	description:$('#description').val()
+                });
+            });
+            
+            $('#pagination').children('li:first').click(function() {
+                window.page.currentPage = 1;
+                query(window.page);
+            });
+
+            $('#pagination').children('li:last').click(function() {
+                window.page.currentPage = window.page.totalPage;
+                query(window.page);
+            });
+            $('#pageSize').change(function() {
+                window.page.currentPage = 1;
+                window.page.pageSize = Number($('#pageSize').val());
+                query(window.page);
+            });
+
+            $('#go').click(function() {
+                window.page.currentPage = Number($('#currentPage').val());
+                query(window.page);
+            });
+            
+        });
+        function resetPage(page) {
+            window.page.total = page.total;
+            window.page.currentPage = page.currentPage;
+            window.page.pageSize = page.pageSize;
+            window.page.totalPage  = Math.ceil(page.total/window.page.pageSize);
+            $('#countPage').text("总共："+window.page.totalPage+"页");
+        }
+        //刷新分页按钮
+        function refreshPagination() {
+            $('#pagination').children('li.page').remove();
+            var pages = [];
+           if (window.page.totalPage - window.page.currentPage < 4) {
+                pages = range(Math.max(1,window.page.totalPage-9),window.page.totalPage)
+            } else if (window.page.currentPage -1 < 4) {
+                pages = range(1, Math.min(window.page.totalPage,9))
+            } else {
+                pages =  range(Number(window.page.currentPage)-4,Number(window.page.currentPage)+4);
+            }
+            var template = "<li class='page'><a href='#'></a></li>"
+            for (var item of pages) {
+                var $first = $("#pagination").children('li:last');
+                var $template = $(template);
+                $template.children('a').text(item);
+                if (item == window.page.currentPage) {
+                    $template.addClass('active');
+                }
+                $first.before($template);
+            }
+            $("#pagination").children('li:first').removeClass('disabled');
+            $('#pagination').children('li:last').removeClass('disabled');
+            if (window.page.currentPage == 1) {
+                $("#pagination").children('li:first').addClass('disabled');
+            }
+            if (window.page.currentPage == page.totalPage) {
+                $("#pagination").children('li:last').addClass('disabled');
+            }
+            $("#pagination li.page").click(function(event) {
+                console.log(event);
+                window.page.currentPage = Number($(event.target).text());
+                query(window.page)
+            });
+        };
+
+
+        function range(min,max) {
+            var arr = [];
+            for (var i=min ;i <= max; i++) {
+                arr.push(i);
+            }
+            return arr;
+        }
+        
+        function query(queryInfo) {
+            var defaultArg = {
+            	title: "",
+            	description: "",
+            	currentPage: 1,
+                pageSize: 10
+            };     
+            queryInfo = $.extend({}, defaultArg, queryInfo);           
+            $.ajax({
+                url: "film",
+                type: "GET",
+                dataType: "json",
+                data: queryInfo,
+                success: function (data) {
+                    // total rows
+                    queryInfo.total = data.total;
+                    resetPage(queryInfo);
+                    console.log(queryInfo);
+                    $('#filmTable tbody').empty();
+                    for (var item of data.rows) {
+                        var $template = $($('#rowTemplate').html()).clone();
+                        $template.children('td').eq(0).text(item.film_id);
+                        $template.children('td').eq(1).text(item.title);
+                        $template.children('td').eq(2).text(item.description);
+                        $template.children('td').eq(3).text(item.language&&item.language.name);
+                        
+                        var btn=$("<a href='update/' class='btn btn-info'>更新</a>"); 
+                        btn.attr('href','update.html?id='+item.film_id); 
+                        $template.children('td').eq(4).append(btn);
+                        
+                      //  var btn1=$("<a class='deletehref' href='film/delete/' onclick='return sumbit_sure()'>删除</a>"); 
+                      //  btn1.attr('href','film/delete/'+item.film_id); 
+                       // $template.children('td').eq(5).append(btn1);
+                       var btn1=$("<button class='btn btn-danger'>删除</button>"); 
+                       btn1.attr('id','film/delete/'+item.film_id); 
+                       var ids=btn1.attr('id');
+                      // console.log(ids);
+                       btn1.click(function(){
+                            de(this);
+                       });
+                      $template.children('td').eq(5).append(btn1);                       
+                      
+                      $('#filmTable').append($template);
+                    }
+        
+                    $('#currentPage').attr('max',window.page.totalPage);
+                    $('#currentPage').val(queryInfo.currentPage);
+
+                    refreshPagination();
+                }
+            }) 
+        }
+        function de(btn){
+        	//console.log("id"+btn.id);
+      	   Modal.confirm(
+ 				  {
+ 				    msg: "是否删除电影？"
+ 				  })
+ 				  .on( function (e) {
+ 					  if (e) {
+                          deleteFilm(btn.id);
+ 					  }
+ 				  });
+        }
+        
+        function deleteFilm(deleteurl){
+            $.ajax({
+                url: deleteurl,
+                type: "GET",
+                dataType: "json",
+                data: deleteurl,
+                success: function (data) {
+                   window.location.href="index.html";
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                	Modal.alert({
+                			    title: 'Alert',
+                			    msg: 'Delete Error!',
+                			    btnok: 'OK'
+                			  });
+
+                }
+            }) 
+        }
+        
+        /*
+                       / $('#'+"delete"+item.film_id).bind("click",function(){
+                       //     alert("Test");
+                       // });
+                     addBtnEvent('delete/'+item.film_id);
+                    function addBtnEvent(id){
+                        $('#'+id).bind("click",function(){
+                            alert("Test");
+                        });
+                    }
+        */
+    </script>
+	</div>
+</body>
+</html>

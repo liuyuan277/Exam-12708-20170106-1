@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Title</title>
+<link rel="stylesheet" href="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="test.js"></script>
+<body>
+	<div class="container">
+		<div>
+			<div class="page-header">
+				<h1>
+					Movie Rentals <small>Insert Film</small>
+				</h1>
+			</div>
+		</div>
+		<div>
+			<div class="form-horizontal" role="form" style="margin-top:150px;">
+				<div class="form-group">
+					<label for="title" class="col-sm-3 control-label">title</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" id="title" placeholder="title">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="description" class="col-sm-3 control-label">description</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" id="description"
+							placeholder="description">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-3">language</label>
+					<div class="col-sm-6">
+						<select id="language" name="language" class="form-control select2"></select>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-offset-2 col-sm-5 col-sm-pull-1 text-right">
+						<button id="insert" class="btn btn-info">Insert</button>
+					</div>
+				</div>
+			</div>
+		</div>
+<!-- system modal start -->
+    <div id="com-alert" class="modal" style="z-index:9999;display: none;" >
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+            <h5 class="modal-title"><i class="fa fa-exclamation-circle"></i> [Title]</h5>
+          </div>
+          <div class="modal-body small">
+            <p>[Message]</p>
+          </div>
+          <div class="modal-footer" >
+            <button type="button" class="btn btn-primary ok" data-dismiss="modal">[BtnOk]</button>
+            <button type="button" class="btn btn-default cancel" data-dismiss="modal">[BtnCancel]</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  <!-- system modal end -->
+		<script>
+		$(window).on('load', function () {
+			 showSel();
+		});
+        $('document').ready(function () {
+            $('#insert').click(function() {
+                insert({
+                	title: $('#title').val(),
+                	description:$('#description').val(),
+                	language:$('#language').val()
+                });
+            });
+        });
+        function insert(queryInfo) {
+        //	console.log("Insert:"+queryInfo.title+":"+queryInfo.description);
+        	if (queryInfo.title=="") {
+             	Modal.alert(
+            			  {
+            			    title: 'Alert',
+            			    msg: "The title cannot be empty!",
+            			    btnok: 'OK'
+            			  });
+         	return false;
+			}
+        	
+        	if (queryInfo.description=="") {
+             	Modal.alert(
+            			  {
+            			    title: 'Alert',
+            			    msg: "The description cannot be empty!",
+            			    btnok: 'OK'
+            			  });
+         	return false;
+			}       
+            $.ajax({
+                url: "film/insert",
+                type: "GET",
+                dataType: "json",
+                data: queryInfo,
+                success: function (data) {
+                	if(data >0){
+                  	   Modal.alert(
+             				  {
+             				    msg: "Insert Success!"
+             				  })
+             				  .on( function (e) {             					 
+             						 window.location = "index.html";          		
+             				  });
+                	}
+                }
+            }) 
+        }
+        
+		        /*获取下拉菜单*/
+			    function showSel() {
+				     $.ajax({
+						"type" : 'get',
+						"url" : 'film/queryLanguage',
+						"dataType" : "json",
+						"success" : function(data) {
+							//console.log(data);  
+							var depart_list = data;
+							var opts = "";
+							for (var depart_index = 0; depart_index < depart_list.length; depart_index++) {
+								var item = depart_list[depart_index];
+								opts += "<option value='"+item.language_id+"'>"+ item.name + "</option>";
+								}
+							$("#language").append(opts);
+							}
+						});
+			     }
+		</script>
+	</div>
+</body>
+</html>
